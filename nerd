@@ -1,4 +1,3 @@
---// Services
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 local TweenService = game:GetService("TweenService")
@@ -6,7 +5,6 @@ local UIS = game:GetService("UserInputService")
 
 local LocalPlayer = Players.LocalPlayer
 
---// GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MockSystemUI"
 ScreenGui.ResetOnSpawn = false
@@ -19,7 +17,6 @@ Frame.BackgroundColor3 = Color3.fromRGB(15,0,0)
 Frame.BorderSizePixel = 0
 Instance.new("UICorner", Frame)
 
--- TOP BAR
 local TopBar = Instance.new("Frame", Frame)
 TopBar.Size = UDim2.new(1,0,0,30)
 TopBar.BackgroundColor3 = Color3.fromRGB(25,0,0)
@@ -32,7 +29,6 @@ Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
 
--- Glow
 local Stroke = Instance.new("UIStroke", Frame)
 Stroke.Color = Color3.fromRGB(255,0,0)
 Stroke.Thickness = 2
@@ -57,7 +53,6 @@ task.spawn(function()
 	end
 end)
 
---// DRAG SYSTEM
 local dragging = false
 local dragStart, startPos
 
@@ -94,7 +89,6 @@ TopBar.InputChanged:Connect(function(input)
 	end
 end)
 
---// TARGET NAME
 local NameLabel = Instance.new("TextLabel", Frame)
 NameLabel.Position = UDim2.new(0,10,0,40)
 NameLabel.Size = UDim2.new(1,-20,0,15)
@@ -115,7 +109,6 @@ NameBox.Font = Enum.Font.Gotham
 NameBox.TextSize = 14
 Instance.new("UICorner", NameBox)
 
---// COMMENT HEADER
 local CommentHeader = Instance.new("TextLabel", Frame)
 CommentHeader.Position = UDim2.new(0,10,0,92)
 CommentHeader.Size = UDim2.new(1,-55,0,20)
@@ -126,7 +119,6 @@ CommentHeader.TextXAlignment = Enum.TextXAlignment.Left
 CommentHeader.Font = Enum.Font.GothamBold
 CommentHeader.TextSize = 12
 
---// PLUS BUTTON
 local AddButton = Instance.new("TextButton", Frame)
 AddButton.Position = UDim2.new(1,-35,0,90)
 AddButton.Size = UDim2.new(0,25,0,25)
@@ -137,7 +129,6 @@ AddButton.Font = Enum.Font.GothamBold
 AddButton.TextSize = 18
 Instance.new("UICorner", AddButton)
 
---// SCROLLABLE COMMENT AREA
 local CommentScroll = Instance.new("ScrollingFrame", Frame)
 CommentScroll.Position = UDim2.new(0,10,0,117)
 CommentScroll.Size = UDim2.new(1,-20,0,130)
@@ -160,7 +151,6 @@ CommentPadding.PaddingBottom = UDim.new(0,6)
 CommentPadding.PaddingLeft = UDim.new(0,6)
 CommentPadding.PaddingRight = UDim.new(0,6)
 
---// COMMENT BOXES
 local CommentBoxes = {}
 
 local function createCommentBox(defaultText)
@@ -183,10 +173,8 @@ local function createCommentBox(defaultText)
 	return Box
 end
 
--- First comment box
 createCommentBox("Your Comment")
 
--- Add another comment
 AddButton.MouseButton1Click:Connect(function()
 	local newBox = createCommentBox("Your Comment " .. (#CommentBoxes + 1))
 
@@ -200,7 +188,6 @@ AddButton.MouseButton1Click:Connect(function()
 	newBox:CaptureFocus()
 end)
 
---// TOGGLE
 local Toggle = Instance.new("TextButton", Frame)
 Toggle.Size = UDim2.new(1,-20,0,35)
 Toggle.Position = UDim2.new(0,10,1,-45)
@@ -211,14 +198,11 @@ Toggle.Font = Enum.Font.GothamBold
 Toggle.TextSize = 14
 Instance.new("UICorner", Toggle)
 
---// LOGIC
 local ENABLED = false
 local TARGET_NAME = ""
 
--- Which comment gets used next
 local CurrentCommentIndex = 1
 
--- Get comments that actually have text
 local function getComments()
 	local comments = {}
 
@@ -244,11 +228,9 @@ Toggle.MouseButton1Click:Connect(function()
 
 	TARGET_NAME = NameBox.Text
 
-	-- Start from the first comment whenever enabled
 	CurrentCommentIndex = 1
 end)
 
---// FIND PLAYER
 local function findPlayer(input)
 	input = string.lower(input)
 
@@ -260,7 +242,6 @@ local function findPlayer(input)
 	end
 end
 
---// CHAT LISTENER
 TextChatService.OnIncomingMessage = function(message)
 	if not ENABLED then
 		return
@@ -276,23 +257,18 @@ TextChatService.OnIncomingMessage = function(message)
 
 				local comments = getComments()
 
-				-- No comments entered
 				if #comments == 0 then
 					return
 				end
 
-				-- Get current comment
 				local COMMENT = comments[CurrentCommentIndex]
 
-				-- Move to the next comment
 				CurrentCommentIndex += 1
 
-				-- Loop back to the first comment
 				if CurrentCommentIndex > #comments then
 					CurrentCommentIndex = 1
 				end
 
-				-- Send message
 				local final = '"' .. message.Text .. '" ' .. COMMENT
 
 				TextChatService.TextChannels.RBXGeneral:SendAsync(final)
