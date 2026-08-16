@@ -1,0 +1,302 @@
+--// Services
+local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+
+--// GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MockSystemUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 320, 0, 300)
+Frame.Position = UDim2.new(0.5, -160, 0.5, -150)
+Frame.BackgroundColor3 = Color3.fromRGB(15,0,0)
+Frame.BorderSizePixel = 0
+Instance.new("UICorner", Frame)
+
+-- TOP BAR
+local TopBar = Instance.new("Frame", Frame)
+TopBar.Size = UDim2.new(1,0,0,30)
+TopBar.BackgroundColor3 = Color3.fromRGB(25,0,0)
+
+local Title = Instance.new("TextLabel", TopBar)
+Title.Size = UDim2.new(1,0,1,0)
+Title.Text = "Mock System"
+Title.TextColor3 = Color3.new(1,1,1)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+
+-- Glow
+local Stroke = Instance.new("UIStroke", Frame)
+Stroke.Color = Color3.fromRGB(255,0,0)
+Stroke.Thickness = 2
+
+task.spawn(function()
+	while true do
+		TweenService:Create(
+			Stroke,
+			TweenInfo.new(1),
+			{Color = Color3.fromRGB(255,60,60)}
+		):Play()
+
+		task.wait(1)
+
+		TweenService:Create(
+			Stroke,
+			TweenInfo.new(1),
+			{Color = Color3.fromRGB(120,0,0)}
+		):Play()
+
+		task.wait(1)
+	end
+end)
+
+--// DRAG SYSTEM
+local dragging = false
+local dragStart, startPos
+
+TopBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+
+		dragging = true
+		dragStart = input.Position
+		startPos = Frame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+TopBar.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement
+	or input.UserInputType == Enum.UserInputType.Touch then
+
+		if dragging then
+			local delta = input.Position - dragStart
+
+			Frame.Position = UDim2.new(
+				startPos.X.Scale,
+				startPos.X.Offset + delta.X,
+				startPos.Y.Scale,
+				startPos.Y.Offset + delta.Y
+			)
+		end
+	end
+end)
+
+--// TARGET NAME
+local NameLabel = Instance.new("TextLabel", Frame)
+NameLabel.Position = UDim2.new(0,10,0,40)
+NameLabel.Size = UDim2.new(1,-20,0,15)
+NameLabel.Text = "Target Name"
+NameLabel.TextColor3 = Color3.fromRGB(200,200,200)
+NameLabel.BackgroundTransparency = 1
+NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+NameLabel.Font = Enum.Font.Gotham
+NameLabel.TextSize = 12
+
+local NameBox = Instance.new("TextBox", Frame)
+NameBox.Position = UDim2.new(0,10,0,55)
+NameBox.Size = UDim2.new(1,-20,0,30)
+NameBox.PlaceholderText = "Target Name"
+NameBox.BackgroundColor3 = Color3.fromRGB(30,0,0)
+NameBox.TextColor3 = Color3.new(1,1,1)
+NameBox.Font = Enum.Font.Gotham
+NameBox.TextSize = 14
+Instance.new("UICorner", NameBox)
+
+--// COMMENT HEADER
+local CommentHeader = Instance.new("TextLabel", Frame)
+CommentHeader.Position = UDim2.new(0,10,0,92)
+CommentHeader.Size = UDim2.new(1,-55,0,20)
+CommentHeader.Text = "Comments"
+CommentHeader.TextColor3 = Color3.fromRGB(200,200,200)
+CommentHeader.BackgroundTransparency = 1
+CommentHeader.TextXAlignment = Enum.TextXAlignment.Left
+CommentHeader.Font = Enum.Font.GothamBold
+CommentHeader.TextSize = 12
+
+--// PLUS BUTTON
+local AddButton = Instance.new("TextButton", Frame)
+AddButton.Position = UDim2.new(1,-35,0,90)
+AddButton.Size = UDim2.new(0,25,0,25)
+AddButton.Text = "+"
+AddButton.TextColor3 = Color3.new(1,1,1)
+AddButton.BackgroundColor3 = Color3.fromRGB(100,0,0)
+AddButton.Font = Enum.Font.GothamBold
+AddButton.TextSize = 18
+Instance.new("UICorner", AddButton)
+
+--// SCROLLABLE COMMENT AREA
+local CommentScroll = Instance.new("ScrollingFrame", Frame)
+CommentScroll.Position = UDim2.new(0,10,0,117)
+CommentScroll.Size = UDim2.new(1,-20,0,130)
+CommentScroll.BackgroundColor3 = Color3.fromRGB(20,0,0)
+CommentScroll.BorderSizePixel = 0
+CommentScroll.ScrollBarThickness = 5
+CommentScroll.ScrollBarImageColor3 = Color3.fromRGB(150,0,0)
+CommentScroll.CanvasSize = UDim2.new(0,0,0,0)
+CommentScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+Instance.new("UICorner", CommentScroll)
+
+local CommentLayout = Instance.new("UIListLayout", CommentScroll)
+CommentLayout.Padding = UDim.new(0,6)
+CommentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local CommentPadding = Instance.new("UIPadding", CommentScroll)
+CommentPadding.PaddingTop = UDim.new(0,6)
+CommentPadding.PaddingBottom = UDim.new(0,6)
+CommentPadding.PaddingLeft = UDim.new(0,6)
+CommentPadding.PaddingRight = UDim.new(0,6)
+
+--// COMMENT BOXES
+local CommentBoxes = {}
+
+local function createCommentBox(defaultText)
+	local Box = Instance.new("TextBox")
+	Box.Parent = CommentScroll
+
+	Box.Size = UDim2.new(1,-12,0,30)
+	Box.BackgroundColor3 = Color3.fromRGB(30,0,0)
+	Box.TextColor3 = Color3.new(1,1,1)
+	Box.PlaceholderText = defaultText or "Your Comment"
+	Box.Text = ""
+	Box.Font = Enum.Font.Gotham
+	Box.TextSize = 14
+	Box.ClearTextOnFocus = false
+
+	Instance.new("UICorner", Box)
+
+	table.insert(CommentBoxes, Box)
+
+	return Box
+end
+
+-- First comment box
+createCommentBox("Your Comment")
+
+-- Add another comment
+AddButton.MouseButton1Click:Connect(function()
+	local newBox = createCommentBox("Your Comment " .. (#CommentBoxes + 1))
+
+	task.defer(function()
+		CommentScroll.CanvasPosition = Vector2.new(
+			0,
+			math.max(0, CommentScroll.AbsoluteCanvasSize.Y)
+		)
+	end)
+
+	newBox:CaptureFocus()
+end)
+
+--// TOGGLE
+local Toggle = Instance.new("TextButton", Frame)
+Toggle.Size = UDim2.new(1,-20,0,35)
+Toggle.Position = UDim2.new(0,10,1,-45)
+Toggle.Text = "OFF"
+Toggle.BackgroundColor3 = Color3.fromRGB(80,0,0)
+Toggle.TextColor3 = Color3.new(1,1,1)
+Toggle.Font = Enum.Font.GothamBold
+Toggle.TextSize = 14
+Instance.new("UICorner", Toggle)
+
+--// LOGIC
+local ENABLED = false
+local TARGET_NAME = ""
+
+-- Which comment gets used next
+local CurrentCommentIndex = 1
+
+-- Get comments that actually have text
+local function getComments()
+	local comments = {}
+
+	for _, box in ipairs(CommentBoxes) do
+		local text = box.Text
+
+		if text and text:gsub("%s+", "") ~= "" then
+			table.insert(comments, text)
+		end
+	end
+
+	return comments
+end
+
+Toggle.MouseButton1Click:Connect(function()
+	ENABLED = not ENABLED
+
+	Toggle.Text = ENABLED and "ON" or "OFF"
+	Toggle.BackgroundColor3 =
+		ENABLED
+		and Color3.fromRGB(150,0,0)
+		or Color3.fromRGB(80,0,0)
+
+	TARGET_NAME = NameBox.Text
+
+	-- Start from the first comment whenever enabled
+	CurrentCommentIndex = 1
+end)
+
+--// FIND PLAYER
+local function findPlayer(input)
+	input = string.lower(input)
+
+	for _, p in ipairs(Players:GetPlayers()) do
+		if string.find(string.lower(p.Name), input)
+		or string.find(string.lower(p.DisplayName), input) then
+			return p
+		end
+	end
+end
+
+--// CHAT LISTENER
+TextChatService.OnIncomingMessage = function(message)
+	if not ENABLED then
+		return
+	end
+
+	if message.TextSource then
+		local player = Players:GetPlayerByUserId(message.TextSource.UserId)
+
+		if player and player ~= LocalPlayer then
+			local target = findPlayer(TARGET_NAME)
+
+			if target and player == target then
+
+				local comments = getComments()
+
+				-- No comments entered
+				if #comments == 0 then
+					return
+				end
+
+				-- Get current comment
+				local COMMENT = comments[CurrentCommentIndex]
+
+				-- Move to the next comment
+				CurrentCommentIndex += 1
+
+				-- Loop back to the first comment
+				if CurrentCommentIndex > #comments then
+					CurrentCommentIndex = 1
+				end
+
+				-- Send message
+				local final = '"' .. message.Text .. '" ' .. COMMENT
+
+				TextChatService.TextChannels.RBXGeneral:SendAsync(final)
+			end
+		end
+	end
+end
